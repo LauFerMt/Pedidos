@@ -1,0 +1,16 @@
+<!-- app/templates/pedido_gracias.html -->
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Pedido registrado</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>body{font-family:system-ui;max-width:700px;margin:24px auto;padding:0 16px}</style>
+</head>
+<body>
+  <h1>¡Gracias!</h1>
+  <p>Tu pedido fue registrado con el código: <strong>{{ codigo }}</strong>.</p>
+  <p>Puedes cerrar esta ventana o registrar otro pedido.</p>
+  <p><a href="{{ url_for('pedidos.pedido_form') }}">Registrar otro pedido</a></p>
+</body>
+</html>

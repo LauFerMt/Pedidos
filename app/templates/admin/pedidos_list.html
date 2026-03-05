@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Admin - Pedidos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root{
+      --gap:12px;
+      --bd:#e5e7eb; --txt:#111827; --muted:#6b7280;
+      --bg:#ffffff; --head:#f9fafb; --primary:#0d6efd;
+    }
+    *{box-sizing:border-box}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;color:var(--txt);background:var(--bg);
+         max-width:1200px;margin:24px auto;padding:0 16px}
+    h1{margin:8px 0 4px}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+    .actions a{display:inline-block;text-decoration:none;background:var(--primary);color:#fff;padding:8px 10px;border-radius:6px;margin-left:6px}
+    .actions a.secondary{background:#6b7280}
+    form.filters{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+    input,select,button{padding:8px;border:1px solid var(--bd);border-radius:6px}
+    button{background:var(--primary);color:#fff;border:none;cursor:pointer}
+    table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--bd);border-radius:8px;overflow:hidden}
+    thead th{background:var(--head);text-align:left;padding:10px;border-bottom:1px solid var(--bd);font-weight:600}
+    tbody td{padding:10px;border-bottom:1px solid var(--bd);vertical-align:top}
+    tbody tr:hover{background:#fafafa}
+    .muted{color:var(--muted)}
+    .nowrap{white-space:nowrap}
+    .btn-link{color:var(--primary);text-decoration:none}
+    .total{font-variant-numeric:tabular-nums}
+  </style>
+</head>
+<body>
+
+  <div class="top">
+    <div>
+      <h1>Pedidos</h1>
+      <div class="muted">Admin</div>
+    </div>
+    <div class="actions">
+      <a class="secondary" href="{{ url_for('admin.condiciones_list') }}">Condiciones</a>
+      <a class="secondary" href="{{ url_for('admin.ping_telegram') }}">Ping Telegram</a>
+      <a href="{{ url_for('admin.logout') }}">Salir</a>
+    </div>
+  </div>
+
+  <form class="filters" method="get">
+    <select name="estado" title="Estado">
+      <option value="">Estado</option>
+      {% for e in ['pendiente','con_anticipo','en_produccion','programado_entrega','entregado','cancelado'] %}
+        <option value="{{ e }}" {% if filtros.estado==e %}selected{% endif %}>{{ e }}</option>
+      {% endfor %}
+    </select>
+
+    <input name="vendedor" placeholder="Vendedor" value="{{ filtros.vendedor or '' }}" />
+
+    <label class="nowrap">Del:
+      <input type="date" name="del" value="{{ filtros.del or '' }}" />
+    </label>
+    <label class="nowrap">Al:
+      <input type="date" name="al" value="{{ filtros.al or '' }}" />
+    </label>
+
+    <label class="nowrap" style="display:flex;align-items:center;gap:6px">
+      <input type="checkbox" name="entrega_hoy" value="1" {% if filtros.entrega_hoy=='1' %}checked{% endif %}>
+      Entregas hoy
+    </label>
+
+    <button type="submit">Filtrar</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Vendedor</th>
+        <th>Cliente</th>
+        <th>Ubicación</th>
+        <th>Total</th>
+        <th>Entrega</th>
+        <th>Estado</th>
+        <th class="nowrap">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% if pedidos and pedidos|length>0 %}
+        {% for p in pedidos %}
+          <tr>
+            <td class="nowrap">{{ p['codigo'] }}</td>
+            <td>{{ p['vendedor'] }}</td>
+            <td>{{ p['cliente_nombre'] }}</td>
+            <td>{{ p['colonia'] }}/{{ p['municipio'] }}</td>
+            <td class="total">${{ '%.2f'|format(p['total'] or 0) }}</td>
+            <td class="nowrap">{{ p['fecha_entrega'] or '-' }}</td>
+            <td>{{ p['estado'] }}</td>
+            <td class="nowrap">
+              <a class="btn-link" href="{{ url_for('admin.pedido_detalle', pedido_id=p['id']) }}">Abrir</a>
+            </td>
+          </tr>
+        {% endfor %}
+      {% else %}
+        <tr>
+          <td colspan="8" class="muted">No hay resultados con los filtros actuales.</td>
+        </tr>
+      {% endif %}
+    </tbody>
+  </table>
+
+</body>
+</html>

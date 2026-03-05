@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Admin - Pedido {{ p['codigo'] }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root{
+      --gap:16px; --bd:#e5e7eb; --txt:#111827; --muted:#6b7280;
+      --head:#f9fafb; --primary:#0d6efd; --okbg:#e7f7ee; --ok:#136e3c; --okbd:#b8ebce;
+      --errbg:#fdecec; --err:#7f1d1d; --errbd:#f8caca;
+    }
+    *{box-sizing:border-box}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;color:var(--txt);
+         max-width:1100px;margin:24px auto;padding:0 16px}
+    h1{margin:0}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+    a.btn, button.btn{display:inline-block;padding:8px 10px;background:var(--primary);color:#fff;text-decoration:none;border:none;border-radius:6px;cursor:pointer}
+    .btn.secondary{background:#6b7280}
+    fieldset{border:1px solid var(--bd);border-radius:8px;margin:16px 0;padding:16px}
+    legend{font-weight:700}
+    input,select,textarea{padding:8px;border:1px solid var(--bd);border-radius:6px;width:100%;max-width:480px}
+    .row{display:flex;gap:var(--gap);flex-wrap:wrap}
+    .row > div{flex:1 1 260px}
+    .muted{color:var(--muted)}
+    ul{padding-left:18px}
+    .flash-ok{background:var(--okbg);color:var(--ok);border:1px solid var(--okbd);padding:8px 12px;border-radius:6px;margin:8px 0}
+    .flash-err{background:var(--errbg);color:var(--err);border:1px solid var(--errbd);padding:8px 12px;border-radius:6px;margin:8px 0}
+    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
+  </style>
+</head>
+<body>
+
+  <div class="top">
+    <div>
+      <h1>Pedido {{ p['codigo'] }}</h1>
+      <div class="muted mono">ID: {{ p['id'] }} · Creado: {{ p['created_at'] }}</div>
+    </div>
+    <div>
+      <a class="btn secondary" href="{{ url_for('admin.list_pedidos') }}">← Volver a la lista</a>
+      <a class="btn" href="{{ url_for('admin.logout') }}">Salir</a>
+    </div>
+  </div>
+
+  {# Mensajes flash #}
+  {% with msgs = get_flashed_messages(with_categories=true) %}
+    {% if msgs %}
+      {% for cat, m in msgs %}
+        <div class="flash-{{ 'ok' if cat=='ok' else 'err' }}">{{ m }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <fieldset>
+    <legend>Resumen</legend>
+    <div class="row">
+      <div><strong>Vendedor:</strong> {{ p['vendedor'] }}</div>
+      <div><strong>Cliente:</strong> {{ p['cliente_nombre'] }}</div>
+      <div><strong>Teléfono(s):</strong> {{ p['telefono_1'] }}{% if p['telefono_2'] %} / {{ p['telefono_2'] }}{% endif %}</div>
+      <div><strong>Referencia:</strong> {{ p['referencia'] or '-' }}</div>
+      <div style="flex:1 1 100%">
+        <strong>Dirección:</strong>
+        {{ p['calle'] }} {{ p['numero'] }}, {{ p['colonia'] }}, {{ p['municipio'] }}, CP {{ p['cp'] }}
+        {% if p['manzana'] or p['lote'] %} · Mz: {{ p['manzana'] or '-' }} · Lt: {{ p['lote'] or '-' }}{% endif %}
+      </div>
+      <div>
+        <strong>Ubicación:</strong>
+        {% if p['ubicacion_url'] %}
+          <a class="btn secondary" target="_blank" rel="noopener" href="{{ p['ubicacion_url'] }}">Ver mapa</a>
+        {% else %}
+          <span class="muted">Sin link</span>
+        {% endif %}
+      </div>
+    </div>
+    <hr style="border:none;border-top:1px solid var(--bd);margin:12px 0">
+    <div class="row">
+      <div><strong>Modelo:</strong> {{ p['modelo'] }}</div>
+      <div><strong>Color:</strong> {{ p['color'] }}</div>
+      <div><strong>Tarja:</strong> {{ p['tarja_posicion'] }}</div>
+      <div><strong>Parrilla:</strong> {{ p['parrilla_posicion'] }}</div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <div><strong>Precio:</strong> ${{ '%.2f'|format(p['precio'] or 0) }}</div>
+      <div><strong>Envío:</strong> ${{ '%.2f'|format(p['envio_costo'] or 0) }}</div>
+      <div><strong>Instalación:</strong>
+        {% if p['instalacion_aplica'] %}
+          ${{ '%.2f'|format(p['instalacion_costo'] or 0) }}
+        {% else %}
+          No
+        {% endif %}
+      </div>
+      <div><strong>Total:</strong> ${{ '%.2f'|format(p['total'] or 0) }}</div>
+      <div><strong>Anticipo:</strong>
+        {% if p['con_anticipo'] %}
+          ${{ '%.2f'|format(p['anticipo'] or 0) }}
+          (Saldo: ${{ '%.2f'|format(p['saldo_pendiente'] or 0) }})
+        {% else %}
+          No
+        {% endif %}
+      </div>
+    </div>
+  </fieldset>
+
+  <form method="post">
+    <fieldset>
+      <legend>Entrega / Estado</legend>
+      <div class="row">
+        <div>
+          <label>Fecha de entrega</label>
+          <input type="date" name="fecha_entrega" value="{{ p['fecha_entrega'] or '' }}">
+        </div>
+        <div>
+          <label>Estado</label>
+          <select name="estado">
+            {% for e in ['pendiente','con_anticipo','en_produccion','programado_entrega','entregado','cancelado'] %}
+              <option value="{{ e }}" {% if p['estado']==e %}selected{% endif %}>{{ e }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label>Requiere producción</label>
+          <select name="requiere_produccion">
+            <option value="0" {% if not p['requiere_produccion'] %}selected{% endif %}>No</option>
+            <option value="1" {% if p['requiere_produccion'] %}selected{% endif %}>Sí</option>
+          </select>
+        </div>
+        <div>
+          <label>Días pre-producción</label>
+          <input type="number" name="dias_pre_produccion" value="{{ p['dias_pre_produccion'] or 1 }}" min="0" max="10">
+        </div>
+      </div>
+      <div style="margin-top:12px">
+        <label>Notas</label>
+        <textarea name="notas" rows="3">{{ p['notas'] or '' }}</textarea>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Condiciones (checkbox)</legend>
+      {% if condiciones and condiciones|length>0 %}
+        {% for c in condiciones %}
+          <label style="display:block;margin:6px 0">
+            <input type="checkbox" name="condicion_id" value="{{ c['id'] }}" {% if c['id'] in marcadas_ids %}checked{% endif %}>
+            {{ c['titulo'] }}
+          </label>
+        {% endfor %}
+      {% else %}
+        <p class="muted">No hay condiciones activas en el catálogo.</p>
+      {% endif %}
+    </fieldset>
+
+    <button class="btn" type="submit">Guardar cambios</button>
+  </form>
+
+  <fieldset>
+    <legend>Adjuntos (anticipo)</legend>
+    {% if adjuntos and adjuntos|length>0 %}
+      <ul>
+        {% for a in adjuntos %}
+          <li>
+            <a class="btn secondary" href="{{ url_for('admin.ver_adjunto', adjunto_id=a['id']) }}" target="_blank" rel="noopener">
+              Ver {{ a['filename'] }}
+            </a>
+            <span class="muted">({{ a['mime_type'] }}) · {{ a['uploaded_at'] }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">Sin adjuntos de anticipo.</p>
+    {% endif %}
+  </fieldset>
+
+</body>
+</html>

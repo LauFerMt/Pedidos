@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Admin - Condiciones</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body{font-family:system-ui;max-width:900px;margin:24px auto;padding:0 16px}
+    table{width:100%;border-collapse:collapse}
+    th,td{border-bottom:1px solid #eee;padding:8px;text-align:left}
+    th{background:#fafafa}
+    input{padding:6px;border:1px solid #ccc;border-radius:6px}
+    .row{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+    a.btn, button.btn{display:inline-block;padding:8px 10px;background:#0d6efd;color:#fff;text-decoration:none;border:none;border-radius:6px;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+    <h1>Catálogo de condiciones</h1>
+    <div>
+      {{ url_for(Pedidos</a>
+      {{ url_for(Salir</a>
+    </div>
+  </div>
+
+  <form method="post" class="row">
+    <input type="hidden" name="id" id="cid">
+    <input name="titulo" id="ctitulo" placeholder="Título" required style="flex:1 1 260px">
+    <input name="orden" id="corden" type="number" placeholder="Orden" style="width:120px">
+    <label style="display:flex;align-items:center;gap:6px">
+      <input type="checkbox" name="activo" id="cactivo" value="1" checked> Activo
+    </label>
+    <button class="btn" type="submit">Guardar</button>
+  </form>
+
+  <table>
+    <thead><tr><th>ID</th><th>Título</th><th>Orden</th><th>Activo</th><th></th></tr></thead>
+    <tbody>
+      {% for c in condiciones %}
+      <tr>
+        <td>{{ c['id'] }}</td>
+        <td>{{ c['titulo'] }}</td>
+        <td>{{ c['orden'] }}</td>
+        <td>{{ 'Sí' if c['activo'] else 'No' }}</td>
+        <td>
+          #Editar</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <script>
+    function editCond(id, titulo, orden, activo){
+      document.getElementById('cid').value = id;
+      document.getElementById('ctitulo').value = titulo;
+      document.getElementById('corden').value = orden;
+      document.getElementById('cactivo').checked = !!activo;
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Admin - Iniciar sesión</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body{font-family:system-ui;max-width:480px;margin:48px auto;padding:0 16px}
+    input{width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;margin:6px 0}
+    button{background:#0d6efd;color:#fff;border:none;border-radius:6px;padding:10px 16px;cursor:pointer;width:100%}
+    .err{background:#fdecec;color:#7f1d1d;border:1px solid #f8caca;padding:8px 12px;border-radius:6px;margin-bottom:12px}
+  </style>
+</head>
+<body>
+  <h1>Admin · Iniciar sesión</h1>
+  {% if error %}<div class="err">{{ error }}</div>{% endif %}
+  <form method="post">
+    <label>Usuario</label>
+    <input name="user" autofocus required>
+    <label>Contraseña</label>
+    <input name="password" type="password" required>
+    <button type="submit">Entrar</button>
+  </form>
+</body>
+</html>
